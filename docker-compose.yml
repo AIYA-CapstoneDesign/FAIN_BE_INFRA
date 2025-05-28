@@ -1,6 +1,28 @@
 version: '3.8'
 
 services:
+  nginx:
+    image: nginx:latest
+    container_name: fain-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+    depends_on:
+      - spring
+    
+  certbot:
+    image: certbot/certbot
+    container_name: fain-certbot
+    volumes:
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+    entrypoint: >
+      sh -c "sleep 5 && certbot certonly --webroot -w /var/www/certbot 
+      --email goqkfkrltl12@naver.com --agree-tos --no-eff-email 
+      -d fain-aiya.shop"
   mysql:
     image: mysql:8.0
     container_name: fain-mysql
