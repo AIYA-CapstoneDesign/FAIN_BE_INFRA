@@ -1,0 +1,38 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ main ]  # FAIN_BE_INFRA의 main 브랜치 push 감지
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up SSH agent
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.EC2_PORT }} ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            # Spring 서버 코드 최신화
+            cd ~/FAIN_BE
+            git pull origin release
+
+            # Python 서버 코드 최신화
+            cd ~/FAIN_BE_PY
+            git pull origin release
+
+            # Infra 레포 코드 최신화
+            cd ~/FAIN_BE_INFRA
+            git pull origin main
+
+            # 배포
+            docker-compose down
+            docker-compose up -d --build
+          EOF
