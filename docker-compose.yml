@@ -58,6 +58,7 @@ services:
       - mysql
     networks:
       - fain-net
+    restart: on-failure
 
   python:
     build:
