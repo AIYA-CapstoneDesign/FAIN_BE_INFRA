@@ -13,6 +13,8 @@ services:
       - ./certbot/conf:/etc/letsencrypt
     depends_on:
       - spring
+    networks:
+      - fain-net
     
   certbot:
     image: certbot/certbot
@@ -24,6 +26,8 @@ services:
       sh -c "sleep 5 && certbot certonly --webroot -w /var/www/certbot 
       --email goqkfkrltl12@naver.com --agree-tos --no-eff-email 
       -d fain-aiya.shop"
+    networks:
+      - fain-net
   mysql:
     image: mysql:8.0
     container_name: fain-mysql
@@ -37,6 +41,8 @@ services:
       - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
+    networks:
+      - fain-net
 
   spring:
     build:
@@ -50,6 +56,8 @@ services:
       - ../secrets/firebase-service-account.json:/app/firebase/firebase-service-account.json
     depends_on:
       - mysql
+    networks:
+      - fain-net
 
   python:
     build:
@@ -59,6 +67,12 @@ services:
       - "8000:8000"
     env_file:
       - ../secrets/python.env
+    networks:
+      - fain-net
 
 volumes:
   mysql-data:
+
+networks:
+  fain-net:
+    driver: bridge
